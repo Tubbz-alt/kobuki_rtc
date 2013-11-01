@@ -11,7 +11,17 @@ set(PROJECT_AUTHOR "Mizukawa Lab. Shibaura Univ.")
 set(PROJECT_AUTHOR_SHORT "Mizukawa Lab. Shibaura Univ.")
 
 set(LIBKOBUKI_DIR $ENV{LIBKOBUKI_ROOT})
-set(LIBKOBUKI_INC_DIR ${LIBKOBUKI_DIR}/include)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   # Windows Specific Code
+set(LIBKOBUKI_INC_DIR ${LIBKOBUKI_DIR}/include/)
+
+else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   
+set(LIBKOBUKI_INC_DIR ${LIBKOBUKI_DIR}/include/kobuki-1.0)
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+
+
 set(LIBKOBUKI_LIB_DIR ${LIBKOBUKI_DIR}/lib)
 set(LIBKOBUKI_LIBRARIES kobuki)
 
