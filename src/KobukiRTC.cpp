@@ -145,8 +145,8 @@ RTC::ReturnCode_t KobukiRTC::onExecute(RTC::UniqueId ec_id)
     m_pKobuki->setPose(m_poseUpdate.data.position.x, m_poseUpdate.data.position.y, m_poseUpdate.data.heading);
   }
 
-  m_currentPose.data.position.x = m_pKobuki->getPoseX() * 1000.0;
-  m_currentPose.data.position.y = m_pKobuki->getPoseY() * 1000.0;
+  m_currentPose.data.position.x = m_pKobuki->getPoseX();
+  m_currentPose.data.position.y = m_pKobuki->getPoseY();
   m_currentPose.data.heading = m_pKobuki->getPoseTh();
   m_currentPoseOut.write();
   

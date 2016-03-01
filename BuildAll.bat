@@ -6,7 +6,7 @@
 
 @if NOT EXIST build-win32 mkdir build-win32
 @cd build-win32
-@cmake ../
+@cmake ../ -G "Visual Studio 10"
 @msbuild KobukiRTC.sln /p:Configuration=Release /p:Platform=WIN32
 @cd ../
 @exit /b
