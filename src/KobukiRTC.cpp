@@ -49,7 +49,9 @@ KobukiRTC::KobukiRTC(RTC::Manager* manager)
     m_poseUpdateIn("poseUpdate", m_poseUpdate),
     m_currentPoseOut("currentPose", m_currentPose),
     m_batteryOut("battery", m_battery),
-    m_bumperOut("bumper", m_bumper)
+    m_bumperOut("bumper", m_bumper),
+	m_commandIn("command", m_command),
+	m_dockStateOut("dockState", m_dockState)
 
     // </rtc-template>
 {
@@ -71,11 +73,13 @@ RTC::ReturnCode_t KobukiRTC::onInitialize()
   // Set InPort buffers
   addInPort("targetVelocity", m_targetVelocityIn);
   addInPort("poseUpdate", m_poseUpdateIn);
+  addInPort("command", m_commandIn);
   
   // Set OutPort buffer
   addOutPort("currentPose", m_currentPoseOut);
   addOutPort("battery", m_batteryOut);
   addOutPort("bumper", m_bumperOut);
+  addOutPort("dockState", m_dockStateOut);
   
   // Set service provider to Ports
   
@@ -115,12 +119,27 @@ RTC::ReturnCode_t KobukiRTC::onShutdown(RTC::UniqueId ec_id)
 }
 */
 
-
+std::string getDockStateStr(const DOCKSTATE s) {
+	switch (s) {
+	case IDLE: return "IDLE";
+	case DOCKED: return "DOCKED";
+	case DOCKING: return "DOCKING";
+	case BUMPSTOP: return "BUMPSTOP";
+	case CLIFFSTOP: return "CLIFFSTOP";
+	case DROPSTOP: return "DROPSTOP";
+	case LOSTSTOP: return "LOSTSTOP";
+	default: return "UNKNOWN";
+	}
+}
 RTC::ReturnCode_t KobukiRTC::onActivated(RTC::UniqueId ec_id)
 {
   m_pKobuki = createKobuki(rt_net::KobukiStringArgument(m_port));
   m_bumper.data.length(3);
 
+  m_dockStateBuf = m_pKobuki->getDockState();
+  m_dockState.data = CORBA::string_dup(getDockStateStr(m_dockStateBuf).c_str());
+  setTimestamp(m_dockState);
+  m_dockStateOut.write();
   m_bumper.data.length(3);
   return RTC::RTC_OK;
 }
@@ -157,6 +176,22 @@ RTC::ReturnCode_t KobukiRTC::onExecute(RTC::UniqueId ec_id)
   m_bumper.data[1] = m_pKobuki->isCenterBump();
   m_bumper.data[2] = m_pKobuki->isLeftBump();
   m_bumperOut.write();
+  
+  DOCKSTATE ds = m_pKobuki->getDockState();
+  if (ds != m_dockStateBuf) {
+	  m_dockState.data = CORBA::string_dup(getDockStateStr(ds).c_str());
+	  setTimestamp(m_dockState);
+	  m_dockStateOut.write();
+	  m_dockStateBuf = ds;
+  }
+
+  if (m_commandIn.isNew()) {
+	  m_commandIn.read();
+	  std::string command = m_command.data;
+	  if (command == "DOCK") {
+		  m_pKobuki->dock(false);
+	  }
+  }
   return RTC::RTC_OK;
 }
 

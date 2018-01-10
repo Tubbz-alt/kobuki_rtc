@@ -274,6 +274,14 @@ class KobukiRTC
    */
   OutPort<RTC::TimedDouble> m_batteryOut;
     
+
+  RTC::TimedString m_dockState;
+
+  OutPort<RTC::TimedString> m_dockStateOut;
+
+  RTC::TimedString m_command;
+
+  InPort<RTC::TimedString> m_commandIn;
   // </rtc-template>
 
   // CORBA Port declaration
@@ -301,6 +309,8 @@ class KobukiRTC
   // </rtc-template>
 
 
+	 DOCKSTATE m_dockStateBuf;
+	
   rt_net::Kobuki *m_pKobuki;
 };
 
